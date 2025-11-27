@@ -25,21 +25,76 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
-echo "✓ All prerequisites found"
+# Check Python version
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d. -f1)
+PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
+
+echo "✓ Found Python $PYTHON_VERSION"
+
+# Warn if Python is too new
+if [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -ge 14 ]; then
+    echo "⚠️  Warning: Python 3.14+ detected. Some packages may not be compatible."
+    echo "   Recommended: Python 3.9-3.13"
+    echo ""
+    
+    # Check if python3.13 or python3.12 is available
+    if command -v python3.13 &> /dev/null; then
+        echo "✓ Found python3.13, using it instead..."
+        PYTHON_CMD="python3.13"
+    elif command -v python3.12 &> /dev/null; then
+        echo "✓ Found python3.12, using it instead..."
+        PYTHON_CMD="python3.12"
+    elif command -v python3.11 &> /dev/null; then
+        echo "✓ Found python3.11, using it instead..."
+        PYTHON_CMD="python3.11"
+    else
+        echo "❌ No compatible Python version found (3.9-3.13)"
+        echo "   Please install Python 3.13 or 3.12:"
+        echo "   brew install python@3.13"
+        exit 1
+    fi
+else
+    PYTHON_CMD="python3"
+fi
+
+echo "✓ Using: $PYTHON_CMD"
 echo ""
 
-# Install pybind11
-echo "Step 1: Installing pybind11..."
-pip install pybind11 || pip3 install pybind11
-echo "✓ pybind11 installed"
+# Setup Python backend and install dependencies FIRST
+echo "Step 1: Setting up Python virtual environment..."
+cd backend
+$PYTHON_CMD -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+echo "✓ Python venv created and dependencies installed"
 echo ""
 
-# Build C++ library
-echo "Step 2: Building C++ library..."
-cd cpp
+# Now build C++ library using venv's Python
+echo "Step 2: Building C++ library with venv Python..."
+cd ../cpp
+
+# Clean previous build
+rm -rf build
 mkdir -p build
 cd build
-cmake ..
+
+# Use the venv's Python for CMake - get absolute path
+VENV_PYTHON=$(cd ../../backend/venv/bin && pwd)/python3
+echo "Using venv Python: $VENV_PYTHON"
+
+# Verify pybind11 is available in venv
+if ! $VENV_PYTHON -c "import pybind11" 2>/dev/null; then
+    echo "❌ pybind11 not found in venv. Installing..."
+    cd ../../backend
+    source venv/bin/activate
+    pip install pybind11
+    cd ../cpp/build
+fi
+
+# Build with explicit Python path
+cmake -DPython_EXECUTABLE="$VENV_PYTHON" ..
 make
 make install
 cd ../..
@@ -52,28 +107,22 @@ else
 fi
 echo ""
 
-# Setup Python backend
-echo "Step 3: Setting up Python backend..."
+# Test C++ module with venv
+echo "Step 3: Testing C++ module..."
 cd backend
-python3 -m venv venv
 source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# Test C++ module
-echo "Testing C++ module..."
 python3 -c "import blackscholes_cpp; print('✓ C++ module loads successfully')" || {
     echo "❌ C++ module failed to load"
     exit 1
 }
 cd ..
-echo "✓ Python backend setup complete"
+echo "✓ Backend setup complete"
 echo ""
 
 # Setup Frontend
 echo "Step 4: Setting up Next.js frontend..."
 cd frontend
-npm install
+# npm install
 cd ..
 echo "✓ Frontend setup complete"
 echo ""

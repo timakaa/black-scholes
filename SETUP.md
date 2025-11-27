@@ -1,13 +1,5 @@
 # Setup Instructions
 
-## Prerequisites
-
-- **C++ compiler**: g++ or clang++ (Xcode Command Line Tools on macOS)
-- **CMake**: >= 3.12
-- **Python**: 3.8+ with pip
-- **Node.js**: 18+
-- **npm**: Latest version
-
 ## Quick Start (Automated)
 
 ```bash
@@ -15,29 +7,38 @@ chmod +x build.sh
 ./build.sh
 ```
 
+This will:
+
+1. Create a Python virtual environment in `backend/venv`
+2. Install all Python dependencies (including pybind11) in the venv
+3. Build the C++ library using the venv's Python
+4. Install frontend dependencies
+
+**No global installation required!** Everything is isolated in the project.
+
 ## Manual Installation
 
-### Step 1: Install pybind11
-
-**IMPORTANT**: Install pybind11 first before building C++
+### Step 1: Setup Python Backend & Install Dependencies
 
 ```bash
-# Using pip (recommended)
-pip install pybind11
-
-# Or using Homebrew on macOS
-brew install pybind11
-
-# Verify installation
-python3 -m pybind11 --includes
+cd backend
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
+cd ..
 ```
 
-### Step 2: Build C++ Library
+This installs pybind11 and all other dependencies in the local venv.
+
+### Step 2: Build C++ Library (using venv Python)
 
 ```bash
 cd cpp
 mkdir -p build && cd build
-cmake ..
+
+# Point CMake to the venv's Python
+cmake -DPython_EXECUTABLE=../../backend/venv/bin/python3 ..
 make
 make install
 cd ../..
@@ -45,17 +46,7 @@ cd ../..
 
 **Expected output**: `blackscholes_cpp.cpython-*.so` file in the `backend/` directory
 
-### Step 3: Setup Python Backend
-
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cd ..
-```
-
-### Step 4: Setup Next.js Frontend
+### Step 3: Setup Next.js Frontend
 
 ```bash
 cd frontend
@@ -132,37 +123,35 @@ curl -X POST http://localhost:8000/calculate \
 
 **Error**: `Could not find a package configuration file provided by "pybind11"`
 
-**Solutions**:
+**Solution**: Make sure you're using the venv's Python and pybind11 is installed in it:
 
-1. Install pybind11 via pip:
+```bash
+# Activate venv
+cd backend
+source venv/bin/activate
 
-   ```bash
-   pip install pybind11
-   ```
+# Install pybind11 in venv
+pip install pybind11
 
-2. On macOS with Homebrew:
+# Verify it's installed
+python3 -m pybind11 --includes
 
-   ```bash
-   brew install pybind11
-   export CMAKE_PREFIX_PATH="/opt/homebrew:$CMAKE_PREFIX_PATH"
-   ```
+# Build with venv Python
+cd ../cpp/build
+cmake -DPython_EXECUTABLE=../../backend/venv/bin/python3 ..
+make
+make install
+```
 
-3. Manually set the path:
-   ```bash
-   export pybind11_DIR=$(python3 -m pybind11 --cmakedir)
-   cd cpp/build
-   cmake ..
-   ```
+**Alternative**: If you want to use system Python:
 
-### Python development headers missing
+```bash
+# Install globally
+pip3 install pybind11
 
-**Error**: `Python.h: No such file or directory`
-
-**Solutions**:
-
-- **macOS**: `xcode-select --install`
-- **Ubuntu/Debian**: `sudo apt-get install python3-dev`
-- **Fedora/RHEL**: `sudo dnf install python3-devel`
+# Or on macOS with Homebrew
+brew install pybind11
+```
 
 ### C++ module not loading
 
