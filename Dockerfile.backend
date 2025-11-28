@@ -1,0 +1,54 @@
+FROM python:3.13-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    cmake \
+    g++ \
+    make \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy backend requirements and install Python dependencies
+COPY backend/requirements.txt /app/backend/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r /app/backend/requirements.txt
+
+# Set working directory to backend
+WORKDIR /app/backend
+
+# Expose port
+EXPOSE 8000
+
+# Create entrypoint script that builds C++ module at startup
+COPY <<'EOF' /entrypoint.sh
+#!/bin/bash
+set -e
+
+echo "Building C++ module..."
+cd /app/cpp
+
+# Clean any existing build directory to avoid CMake cache issues
+rm -rf build
+mkdir -p build
+cd build
+
+cmake -DPython_EXECUTABLE=$(which python3) ..
+make
+make install
+
+echo "Verifying C++ module..."
+ls -la /app/backend/blackscholes_cpp*.so
+
+echo "Testing module import..."
+cd /app/backend
+python3 -c "import blackscholes_cpp; print('✓ C++ module loaded successfully')"
+
+echo "Starting server..."
+exec python main.py
+EOF
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
