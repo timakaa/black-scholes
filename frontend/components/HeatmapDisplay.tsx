@@ -18,9 +18,23 @@ export default function HeatmapDisplay({
 }: HeatmapDisplayProps) {
   const [debouncedInput, setDebouncedInput] = useState<any>(null);
 
+  // Validate input data
+  const validateInput = (data: any) => {
+    if (!data) return false;
+    return (
+      data.stock_price > 0 &&
+      data.strike_price > 0 &&
+      data.time_to_maturity > 0 &&
+      data.risk_free_rate >= 0 &&
+      data.risk_free_rate <= 1 &&
+      data.volatility > 0 &&
+      data.volatility <= 5
+    );
+  };
+
   // Debounce input changes
   useEffect(() => {
-    if (!inputData) return;
+    if (!inputData || !validateInput(inputData)) return;
 
     const timer = setTimeout(() => {
       setDebouncedInput({
@@ -35,12 +49,16 @@ export default function HeatmapDisplay({
     return () => clearTimeout(timer);
   }, [inputData, heatmapParams]);
 
-  // Use React Query for caching
+  // Use React Query for caching - only enabled when input is valid
   const {
     data: imageData,
     isLoading,
     error,
-  } = useHeatmap(heatmapType, debouncedInput, !!debouncedInput);
+  } = useHeatmap(
+    heatmapType,
+    debouncedInput,
+    !!debouncedInput && validateInput(inputData),
+  );
 
   return (
     <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>

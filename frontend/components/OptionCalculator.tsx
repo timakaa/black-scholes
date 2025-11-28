@@ -17,7 +17,13 @@ export default function OptionCalculator({
   loading,
   setLoading,
 }: OptionCalculatorProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    stock_price: number | string;
+    strike_price: number | string;
+    time_to_maturity: number | string;
+    risk_free_rate: number | string;
+    volatility: number | string;
+  }>({
     stock_price: 100,
     strike_price: 100,
     time_to_maturity: 1.0,
@@ -25,27 +31,81 @@ export default function OptionCalculator({
     volatility: 0.2,
   });
 
-  const [debouncedFormData, setDebouncedFormData] = useState(formData);
+  const [debouncedFormData, setDebouncedFormData] = useState({
+    stock_price: 100,
+    strike_price: 100,
+    time_to_maturity: 1.0,
+    risk_free_rate: 0.05,
+    volatility: 0.2,
+  });
+  const [isValid, setIsValid] = useState(true);
+
+  // Convert form data to numbers for validation and API
+  const getNumericFormData = () => {
+    return {
+      stock_price:
+        typeof formData.stock_price === "string"
+          ? parseFloat(formData.stock_price) || 0
+          : formData.stock_price,
+      strike_price:
+        typeof formData.strike_price === "string"
+          ? parseFloat(formData.strike_price) || 0
+          : formData.strike_price,
+      time_to_maturity:
+        typeof formData.time_to_maturity === "string"
+          ? parseFloat(formData.time_to_maturity) || 0
+          : formData.time_to_maturity,
+      risk_free_rate:
+        typeof formData.risk_free_rate === "string"
+          ? parseFloat(formData.risk_free_rate) || 0
+          : formData.risk_free_rate,
+      volatility:
+        typeof formData.volatility === "string"
+          ? parseFloat(formData.volatility) || 0
+          : formData.volatility,
+    };
+  };
+
+  // Validate form data
+  const validateFormData = (data: ReturnType<typeof getNumericFormData>) => {
+    return (
+      data.stock_price > 0 &&
+      data.strike_price > 0 &&
+      data.time_to_maturity > 0 &&
+      data.risk_free_rate >= 0 &&
+      data.risk_free_rate <= 1 &&
+      data.volatility > 0 &&
+      data.volatility <= 5
+    );
+  };
 
   // Debounce form data changes
   useEffect(() => {
+    const numericData = getNumericFormData();
+    const valid = validateFormData(numericData);
+    setIsValid(valid);
+
+    if (!valid) return;
+
     const timer = setTimeout(() => {
-      setDebouncedFormData(formData);
+      setDebouncedFormData(numericData);
     }, 500);
 
     return () => clearTimeout(timer);
   }, [formData]);
 
-  // Use React Query for caching
-  const { data, isLoading, isFetching } =
-    useOptionCalculation(debouncedFormData);
+  // Use React Query for caching - only enabled when data is valid
+  const { data, isLoading, isFetching } = useOptionCalculation(
+    debouncedFormData,
+    isValid,
+  );
 
-  // Update parent component when data changes
+  // Update parent component when data changes (only if valid)
   useEffect(() => {
-    if (data) {
+    if (data && isValid) {
       onCalculate(data, debouncedFormData);
     }
-  }, [data, debouncedFormData]);
+  }, [data, debouncedFormData, isValid]);
 
   // Update loading state
   useEffect(() => {
@@ -53,18 +113,29 @@ export default function OptionCalculator({
   }, [isLoading, isFetching, setLoading]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     const newData = {
       ...formData,
-      [e.target.name]: parseFloat(e.target.value) || 0,
+      [e.target.name]: value === "" ? "" : value,
     };
     setFormData(newData);
-    onInputChange?.(newData);
+
+    // Only notify parent with numeric data
+    const numericData = {
+      ...formData,
+      [e.target.name]: parseFloat(value) || 0,
+    };
+    onInputChange?.(numericData);
   };
 
   const updateValue = (field: string, delta: number, min: number = 0) => {
     // Calculate new value
     const currentValue = (formData as any)[field];
-    const newValue = currentValue + delta;
+    const numericValue =
+      typeof currentValue === "string"
+        ? parseFloat(currentValue) || 0
+        : currentValue;
+    const newValue = numericValue + delta;
 
     // Determine decimal places based on delta
     const decimalPlaces = delta.toString().includes(".")
@@ -87,12 +158,21 @@ export default function OptionCalculator({
 
   return (
     <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
-      <div className='flex items-center justify-between mb-6'>
-        <h2 className='text-2xl font-bold text-white'>Input Parameters</h2>
-        {loading && (
-          <div className='flex items-center gap-2'>
-            <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
-            <span className='text-sm text-blue-300'>Calculating...</span>
+      <div className='mb-6'>
+        <div className='flex items-center justify-between mb-2'>
+          <h2 className='text-2xl font-bold text-white'>Input Parameters</h2>
+          {loading && isValid && (
+            <div className='flex items-center gap-2'>
+              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
+              <span className='text-sm text-blue-300'>Calculating...</span>
+            </div>
+          )}
+        </div>
+        {!isValid && (
+          <div className='flex items-center gap-2 px-3 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg'>
+            <span className='text-sm text-yellow-400'>
+              ⚠ Invalid input - please enter valid values
+            </span>
           </div>
         )}
       </div>
