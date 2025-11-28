@@ -40,29 +40,4 @@ See [DOCKER.md](docs/DOCKER.md) for more details.
 
 ### Option 2: Manual Setup
 
-#### 1. Build C++ Library
-
-```bash
-cd cpp
-mkdir build && cd build
-cmake ..
-make
-```
-
-#### 2. Start Backend
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-#### 3. Start Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Visit http://localhost:3000
+See [SETUP.md](docs/SETUP.md) for completely manual setup
