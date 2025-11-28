@@ -6,13 +6,15 @@ import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface OptionCalculatorProps {
-  onCalculate: (data: any) => void;
+  onCalculate: (data: any, inputs: any) => void;
+  onInputChange?: (data: any) => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
 }
 
 export default function OptionCalculator({
   onCalculate,
+  onInputChange,
   loading,
   setLoading,
 }: OptionCalculatorProps) {
@@ -25,10 +27,12 @@ export default function OptionCalculator({
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
+    const newData = {
       ...formData,
       [e.target.name]: parseFloat(e.target.value) || 0,
-    });
+    };
+    setFormData(newData);
+    onInputChange?.(newData);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +41,7 @@ export default function OptionCalculator({
 
     try {
       const response = await axios.post(`${API_URL}/calculate`, formData);
-      onCalculate(response.data);
+      onCalculate(response.data, formData);
     } catch (error) {
       console.error("Error calculating options:", error);
       alert("Error calculating options. Make sure the backend is running.");

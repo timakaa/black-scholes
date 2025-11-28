@@ -96,13 +96,15 @@ def calculate_option(input_data: OptionInput):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/distribution", response_model=DistributionResponse)
-def get_price_distribution(input_data: OptionInput, points: int = 100):
-    """Get price distribution data for visualization"""
+@app.post("/heatmap/{heatmap_type}")
+def get_heatmap(heatmap_type: str, input_data: OptionInput):
+    """Generate heatmap visualization"""
     if not bs:
         raise HTTPException(status_code=500, detail="C++ module not loaded")
     
     try:
+        from app.visualization import generate_option_heatmap, generate_greeks_heatmap
+        
         model = bs.BlackScholes(
             input_data.stock_price,
             input_data.strike_price,
@@ -111,40 +113,16 @@ def get_price_distribution(input_data: OptionInput, points: int = 100):
             input_data.volatility
         )
         
-        distribution = model.generate_price_distribution(points)
+        if heatmap_type == "call":
+            image_data = generate_option_heatmap(model, "call")
+        elif heatmap_type == "put":
+            image_data = generate_option_heatmap(model, "put")
+        elif heatmap_type in ["call_delta", "put_delta", "gamma", "vega", "call_theta", "put_theta"]:
+            image_data = generate_greeks_heatmap(model, heatmap_type)
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown heatmap type: {heatmap_type}")
         
-        return DistributionResponse(
-            distribution=[PricePoint(price=p, value=v) for p, v in distribution]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/profit-loss/{option_type}", response_model=ProfitLossResponse)
-def get_profit_loss(option_type: str, input_data: OptionInput, points: int = 100):
-    """Get profit/loss data for visualization"""
-    if not bs:
-        raise HTTPException(status_code=500, detail="C++ module not loaded")
-    
-    if option_type not in ["call", "put"]:
-        raise HTTPException(status_code=400, detail="option_type must be 'call' or 'put'")
-    
-    try:
-        model = bs.BlackScholes(
-            input_data.stock_price,
-            input_data.strike_price,
-            input_data.time_to_maturity,
-            input_data.risk_free_rate,
-            input_data.volatility
-        )
-        
-        is_call = option_type == "call"
-        premium = model.call_price() if is_call else model.put_price()
-        
-        profit_loss = model.generate_profit_loss(is_call, premium, points)
-        
-        return ProfitLossResponse(
-            data=[PricePoint(price=p, value=v) for p, v in profit_loss]
-        )
+        return {"image": image_data}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -4,22 +4,37 @@ import { useState } from "react";
 import OptionCalculator from "@/components/OptionCalculator";
 import GreeksDisplay from "@/components/GreeksDisplay";
 import ProbabilityDisplay from "@/components/ProbabilityDisplay";
-import PriceDistributionChart from "@/components/PriceDistributionChart";
-import ProfitLossChart from "@/components/ProfitLossChart";
+import HeatmapDisplay from "@/components/HeatmapDisplay";
 
 export default function Home() {
   const [optionData, setOptionData] = useState<any>(null);
+  const [inputData, setInputData] = useState<any>({
+    stock_price: 100,
+    strike_price: 100,
+    time_to_maturity: 1.0,
+    risk_free_rate: 0.05,
+    volatility: 0.2,
+  });
   const [loading, setLoading] = useState(false);
 
+  const handleCalculate = (data: any, inputs: any) => {
+    setOptionData(data);
+    setInputData(inputs);
+  };
+
+  const handleInputChange = (data: any) => {
+    setInputData(data);
+  };
+
   return (
-    <main className='min-h-screen bg-linear-to-br from-slate-900 via-blue-900 to-slate-900 p-8'>
+    <main className='min-h-screen bg-linear-to-br from-slate-950 via-blue-950 to-slate-950 p-8'>
       <div className='max-w-7xl mx-auto'>
         <header className='text-center mb-12'>
           <h1 className='text-5xl font-bold text-white mb-4'>
             Black-Scholes Option Pricing
           </h1>
           <p className='text-xl text-blue-200'>
-            European Option Calculator with Real-time Greeks & Probabilities
+            European Option Calculator with Real-time Greeks & Heatmaps
           </p>
         </header>
 
@@ -27,7 +42,8 @@ export default function Home() {
           {/* Left Column - Input */}
           <div className='lg:col-span-1'>
             <OptionCalculator
-              onCalculate={setOptionData}
+              onCalculate={handleCalculate}
+              onInputChange={handleInputChange}
               loading={loading}
               setLoading={setLoading}
             />
@@ -75,12 +91,21 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Charts */}
-                <PriceDistributionChart />
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  <ProfitLossChart optionType='call' />
-                  <ProfitLossChart optionType='put' />
-                </div>
+                {/* Heatmaps */}
+                {inputData && (
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <HeatmapDisplay
+                      title='Call Option Price Heatmap'
+                      heatmapType='call'
+                      inputData={inputData}
+                    />
+                    <HeatmapDisplay
+                      title='Put Option Price Heatmap'
+                      heatmapType='put'
+                      inputData={inputData}
+                    />
+                  </div>
+                )}
               </>
             )}
 
