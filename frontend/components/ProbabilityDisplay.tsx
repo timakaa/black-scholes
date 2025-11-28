@@ -17,7 +17,7 @@ export default function ProbabilityDisplay({
   const color = type === "call" ? "green" : "red";
 
   return (
-    <div className='bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20'>
+    <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
       <h3 className='text-xl font-bold text-white mb-4'>{title}</h3>
       <div className='space-y-3'>
         <div

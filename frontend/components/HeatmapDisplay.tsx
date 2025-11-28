@@ -48,11 +48,16 @@ export default function HeatmapDisplay({
       }
     };
 
-    fetchHeatmap();
+    // Debounce the heatmap fetch
+    const timer = setTimeout(() => {
+      fetchHeatmap();
+    }, 800); // 800ms debounce (slightly longer than calculator since heatmaps are heavier)
+
+    return () => clearTimeout(timer);
   }, [heatmapType, inputData]);
 
   return (
-    <div className='bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20'>
+    <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
       <h3 className='text-xl font-bold text-white mb-4'>{title}</h3>
 
       {loading && (

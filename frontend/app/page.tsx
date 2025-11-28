@@ -27,8 +27,8 @@ export default function Home() {
   };
 
   return (
-    <main className='min-h-screen bg-linear-to-br from-slate-950 via-blue-950 to-slate-950 p-8'>
-      <div className='max-w-7xl mx-auto'>
+    <main className='min-h-screen p-8 bg-[#070e20]'>
+      <div className='max-w-7xl mx-auto relative'>
         <header className='text-center mb-12'>
           <h1 className='text-5xl font-bold text-white mb-4'>
             Black-Scholes Option Pricing
@@ -41,12 +41,14 @@ export default function Home() {
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
           {/* Left Column - Input */}
           <div className='lg:col-span-1'>
-            <OptionCalculator
-              onCalculate={handleCalculate}
-              onInputChange={handleInputChange}
-              loading={loading}
-              setLoading={setLoading}
-            />
+            <div className='sticky top-8 self-start'>
+              <OptionCalculator
+                onCalculate={handleCalculate}
+                onInputChange={handleInputChange}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            </div>
           </div>
 
           {/* Right Column - Results */}
@@ -54,7 +56,7 @@ export default function Home() {
             {optionData && (
               <>
                 {/* Option Prices */}
-                <div className='bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20'>
+                <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
                   <h2 className='text-2xl font-bold text-white mb-4'>
                     Option Prices
                   </h2>
@@ -93,7 +95,7 @@ export default function Home() {
 
                 {/* Heatmaps */}
                 {inputData && (
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                  <div className='space-y-6'>
                     <HeatmapDisplay
                       title='Call Option Price Heatmap'
                       heatmapType='call'
@@ -109,11 +111,12 @@ export default function Home() {
               </>
             )}
 
-            {!optionData && !loading && (
-              <div className='bg-white/10 backdrop-blur-lg rounded-xl p-12 border border-white/20 text-center'>
-                <p className='text-xl text-blue-200'>
-                  Enter parameters and click Calculate to see results
-                </p>
+            {!optionData && loading && (
+              <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-12 border border-white/10 shadow-2xl text-center'>
+                <div className='flex flex-col items-center gap-4'>
+                  <div className='animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500'></div>
+                  <p className='text-xl text-blue-200'>Loading results...</p>
+                </div>
               </div>
             )}
           </div>

@@ -56,7 +56,7 @@ export default function GreeksDisplay({ greeks }: GreeksDisplayProps) {
   ];
 
   return (
-    <div className='bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20'>
+    <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
       <h2 className='text-2xl font-bold text-white mb-4'>Greeks</h2>
       <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
         {greekItems.map((item) => (
