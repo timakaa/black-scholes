@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import NumberInput from "./NumberInput";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { useOptionCalculation } from "@/hooks/useOptionCalculation";
 
 interface OptionCalculatorProps {
   onCalculate: (data: any, inputs: any) => void;
@@ -27,38 +25,32 @@ export default function OptionCalculator({
     volatility: 0.2,
   });
 
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const [debouncedFormData, setDebouncedFormData] = useState(formData);
 
-  const calculateOptions = async (data: any) => {
-    setLoading(true);
-    try {
-      const response = await axios.post(`${API_URL}/calculate`, data);
-      onCalculate(response.data, data);
-    } catch (error) {
-      console.error("Error calculating options:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Debounce form data changes
   useEffect(() => {
-    // Clear existing timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
+    const timer = setTimeout(() => {
+      setDebouncedFormData(formData);
+    }, 500);
 
-    // Set new timer for debounced calculation
-    debounceTimer.current = setTimeout(() => {
-      calculateOptions(formData);
-    }, 500); // 500ms debounce
-
-    // Cleanup
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
+    return () => clearTimeout(timer);
   }, [formData]);
+
+  // Use React Query for caching
+  const { data, isLoading, isFetching } =
+    useOptionCalculation(debouncedFormData);
+
+  // Update parent component when data changes
+  useEffect(() => {
+    if (data) {
+      onCalculate(data, debouncedFormData);
+    }
+  }, [data, debouncedFormData]);
+
+  // Update loading state
+  useEffect(() => {
+    setLoading(isLoading || isFetching);
+  }, [isLoading, isFetching, setLoading]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newData = {

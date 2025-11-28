@@ -1,6 +1,53 @@
-# Redis Cache Documentation
+# Cache Documentation
 
-## Features
+## Overview
+
+The Black-Scholes platform implements a multi-layer caching strategy for optimal performance:
+
+1. **Frontend Cache (React Query)**: Client-side caching with 1-minute stale time, 5-minute cache time
+2. **Backend Cache (Redis)**: Server-side caching with 1-hour TTL
+
+This dual-layer approach minimizes network requests and computational load while ensuring data freshness.
+
+## Frontend Caching (React Query)
+
+### Features
+
+- **Automatic Request Deduplication**: Multiple components requesting same data share a single request
+- **Background Refetching**: Stale data is refetched in the background
+- **Cache Persistence**: Data cached for 5 minutes even after component unmount
+- **Optimistic Updates**: UI updates immediately while requests are in flight
+
+### Configuration
+
+**Option Calculations:**
+
+- **Stale Time**: 1 minute (data considered fresh for 60 seconds)
+- **Cache Time (gcTime)**: 5 minutes (data kept in memory for 5 minutes)
+- **Debounce**: 500ms
+- **Refetch on Window Focus**: Disabled
+- **Retry**: 1 attempt on failure
+
+**Heatmaps:**
+
+- **Stale Time**: 2 minutes (heatmaps change less frequently)
+- **Cache Time (gcTime)**: 10 minutes (kept longer due to generation cost)
+- **Debounce**: 800ms (longer due to heavier computation)
+- **Refetch on Window Focus**: Disabled
+- **Retry**: 1 attempt on failure
+
+### How It Works
+
+1. User changes input parameters
+2. Input is debounced (500ms for calculations, 800ms for heatmaps)
+3. React Query checks cache for matching parameters
+4. If cached and fresh, returns immediately
+5. If stale or missing, fetches from backend
+6. Result is cached for future requests
+
+## Backend Caching (Redis)
+
+### Features
 
 - **Automatic Caching**: All `/calculate` and `/implied-volatility` endpoints automatically cache results
 - **TTL Management**: Cached values expire after **1 hour (3600 seconds)**
@@ -70,14 +117,22 @@ Examples:
 
 ### What Gets Cached
 
+**Frontend (React Query):**
+
+- Option price calculations
+- Implied volatility calculations
+- Heatmap visualizations (2-minute stale time, 10-minute cache)
+
+**Backend (Redis):**
+
 - Option price calculations (`/calculate` endpoint)
 - Implied volatility calculations (`/implied-volatility` endpoint)
 
 ### What Doesn't Get Cached
 
-- Heatmap visualizations (too large, dynamic)
 - Health checks
 - Root endpoint
+- Heatmaps on backend (too large for Redis, cached on frontend only)
 
 ### TTL (Time To Live)
 

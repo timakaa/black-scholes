@@ -105,7 +105,7 @@ export default function Home() {
 
                 {/* Heatmaps */}
                 {inputData && (
-                  <div className='space-y-6'>
+                  <div className='gap-6 grid grid-cols-1 md:grid-cols-2'>
                     <HeatmapDisplay
                       title='Call Option Price Heatmap'
                       heatmapType='call'

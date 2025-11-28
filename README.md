@@ -28,7 +28,9 @@ A full-stack application for pricing European options using the Black-Scholes mo
 ## Features
 
 - **High-Performance Calculations**: C++ core for fast Black-Scholes computations
-- **Redis Caching**: Automatic caching of calculations to improve response times
+- **Multi-Layer Caching**:
+  - Backend: Redis caching (1 hour TTL)
+  - Frontend: React Query caching (1 minute stale time, 5 minutes cache time)
 - **RESTful API**: Clean FastAPI backend with automatic documentation
 - **Interactive UI**: Modern Next.js frontend with real-time calculations
 

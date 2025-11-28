@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { useHeatmap } from "@/hooks/useOptionCalculation";
 
 interface HeatmapDisplayProps {
   title: string;
@@ -18,58 +16,37 @@ export default function HeatmapDisplay({
   inputData,
   heatmapParams,
 }: HeatmapDisplayProps) {
-  const [imageData, setImageData] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [debouncedInput, setDebouncedInput] = useState<any>(null);
 
+  // Debounce input changes
   useEffect(() => {
-    if (!inputData) {
-      console.log("No input data for heatmap");
-      return;
-    }
+    if (!inputData) return;
 
-    const fetchHeatmap = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const requestData = {
-          ...inputData,
-          min_spot_price: heatmapParams?.minSpotPrice || 70,
-          max_spot_price: heatmapParams?.maxSpotPrice || 130,
-          min_volatility: heatmapParams?.minVolatility || 0.1,
-          max_volatility: heatmapParams?.maxVolatility || 0.4,
-        };
-        console.log(`Fetching heatmap: ${heatmapType}`, requestData);
-        const response = await axios.post(
-          `${API_URL}/heatmap/${heatmapType}`,
-          requestData,
-        );
-        console.log("Heatmap response:", response.data);
-        setImageData(response.data.image);
-      } catch (err: any) {
-        const errorMsg =
-          err.response?.data?.detail || "Failed to generate heatmap";
-        setError(errorMsg);
-        console.error("Heatmap error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Debounce the heatmap fetch
     const timer = setTimeout(() => {
-      fetchHeatmap();
-    }, 800); // 800ms debounce (slightly longer than calculator since heatmaps are heavier)
+      setDebouncedInput({
+        ...inputData,
+        min_spot_price: heatmapParams?.minSpotPrice || 70,
+        max_spot_price: heatmapParams?.maxSpotPrice || 130,
+        min_volatility: heatmapParams?.minVolatility || 0.1,
+        max_volatility: heatmapParams?.maxVolatility || 0.4,
+      });
+    }, 800);
 
     return () => clearTimeout(timer);
-  }, [heatmapType, inputData, heatmapParams]);
+  }, [inputData, heatmapParams]);
+
+  // Use React Query for caching
+  const {
+    data: imageData,
+    isLoading,
+    error,
+  } = useHeatmap(heatmapType, debouncedInput, !!debouncedInput);
 
   return (
     <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>
       <h3 className='text-xl font-bold text-white mb-4'>{title}</h3>
 
-      {loading && (
+      {isLoading && (
         <div className='flex items-center justify-center h-64'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500'></div>
         </div>
@@ -77,26 +54,20 @@ export default function HeatmapDisplay({
 
       {error && (
         <div className='flex items-center justify-center h-64'>
-          <p className='text-red-400'>{error}</p>
+          <p className='text-red-400'>
+            {(error as any)?.response?.data?.detail ||
+              "Failed to generate heatmap"}
+          </p>
         </div>
       )}
 
-      {imageData && !loading && !error && (
+      {imageData && !isLoading && !error && (
         <div className='rounded-lg overflow-hidden bg-slate-900'>
-          <img
-            src={imageData}
-            alt={title}
-            className='w-full h-auto'
-            onError={(e) => {
-              console.error("Image failed to load:", e);
-              setError("Failed to display image");
-            }}
-            onLoad={() => console.log("Image loaded successfully")}
-          />
+          <img src={imageData} alt={title} className='w-full h-auto' />
         </div>
       )}
 
-      {!imageData && !loading && !error && (
+      {!imageData && !isLoading && !error && (
         <div className='flex items-center justify-center h-64'>
           <p className='text-blue-300'>Waiting for data...</p>
         </div>
