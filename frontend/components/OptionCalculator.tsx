@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import NumberInput from "./NumberInput";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -105,162 +106,57 @@ export default function OptionCalculator({
       </div>
 
       <div className='space-y-4'>
-        <div>
-          <label className='block text-sm font-medium text-blue-200 mb-2'>
-            Stock Price (S)
-          </label>
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              name='stock_price'
-              value={formData.stock_price}
-              onChange={handleChange}
-              step='0.01'
-              className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              required
-            />
-            <button
-              type='button'
-              onClick={() => updateValue("stock_price", -1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              −
-            </button>
-            <button
-              type='button'
-              onClick={() => updateValue("stock_price", 1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <NumberInput
+          label='Stock Price (S)'
+          name='stock_price'
+          value={formData.stock_price}
+          onChange={handleChange}
+          onIncrement={() => updateValue("stock_price", 1, 0.01)}
+          onDecrement={() => updateValue("stock_price", -1, 0.01)}
+          step='0.01'
+        />
 
-        <div>
-          <label className='block text-sm font-medium text-blue-200 mb-2'>
-            Strike Price (K)
-          </label>
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              name='strike_price'
-              value={formData.strike_price}
-              onChange={handleChange}
-              step='0.01'
-              className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              required
-            />
-            <button
-              type='button'
-              onClick={() => updateValue("strike_price", -1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              −
-            </button>
-            <button
-              type='button'
-              onClick={() => updateValue("strike_price", 1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <NumberInput
+          label='Strike Price (K)'
+          name='strike_price'
+          value={formData.strike_price}
+          onChange={handleChange}
+          onIncrement={() => updateValue("strike_price", 1, 0.01)}
+          onDecrement={() => updateValue("strike_price", -1, 0.01)}
+          step='0.01'
+        />
 
-        <div>
-          <label className='block text-sm font-medium text-blue-200 mb-2'>
-            Time to Maturity (Years)
-          </label>
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              name='time_to_maturity'
-              value={formData.time_to_maturity}
-              onChange={handleChange}
-              step='0.01'
-              className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              required
-            />
-            <button
-              type='button'
-              onClick={() => updateValue("time_to_maturity", -0.1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              −
-            </button>
-            <button
-              type='button'
-              onClick={() => updateValue("time_to_maturity", 0.1, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <NumberInput
+          label='Time to Maturity (Years)'
+          name='time_to_maturity'
+          value={formData.time_to_maturity}
+          onChange={handleChange}
+          onIncrement={() => updateValue("time_to_maturity", 0.1, 0.01)}
+          onDecrement={() => updateValue("time_to_maturity", -0.1, 0.01)}
+          step='0.01'
+        />
 
-        <div>
-          <label className='block text-sm font-medium text-blue-200 mb-2'>
-            Risk-Free Rate (r)
-          </label>
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              name='risk_free_rate'
-              value={formData.risk_free_rate}
-              onChange={handleChange}
-              step='0.001'
-              className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              required
-            />
-            <button
-              type='button'
-              onClick={() => updateValue("risk_free_rate", -0.01, 0)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              −
-            </button>
-            <button
-              type='button'
-              onClick={() => updateValue("risk_free_rate", 0.01, 0)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              +
-            </button>
-          </div>
-          <p className='text-xs text-blue-300 mt-1'>Example: 0.05 = 5%</p>
-        </div>
+        <NumberInput
+          label='Risk-Free Rate (r)'
+          name='risk_free_rate'
+          value={formData.risk_free_rate}
+          onChange={handleChange}
+          onIncrement={() => updateValue("risk_free_rate", 0.01, 0)}
+          onDecrement={() => updateValue("risk_free_rate", -0.01, 0)}
+          step='0.001'
+          helperText='Example: 0.05 = 5%'
+        />
 
-        <div>
-          <label className='block text-sm font-medium text-blue-200 mb-2'>
-            Volatility (σ)
-          </label>
-          <div className='flex gap-2'>
-            <input
-              type='number'
-              name='volatility'
-              value={formData.volatility}
-              onChange={handleChange}
-              step='0.01'
-              className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              required
-            />
-            <button
-              type='button'
-              onClick={() => updateValue("volatility", -0.01, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              −
-            </button>
-            <button
-              type='button'
-              onClick={() => updateValue("volatility", 0.01, 0.01)}
-              className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-            >
-              +
-            </button>
-          </div>
-          <p className='text-xs text-blue-300 mt-1'>Example: 0.2 = 20%</p>
-        </div>
+        <NumberInput
+          label='Volatility (σ)'
+          name='volatility'
+          value={formData.volatility}
+          onChange={handleChange}
+          onIncrement={() => updateValue("volatility", 0.01, 0.01)}
+          onDecrement={() => updateValue("volatility", -0.01, 0.01)}
+          step='0.01'
+          helperText='Example: 0.2 = 20%'
+        />
       </div>
     </div>
   );

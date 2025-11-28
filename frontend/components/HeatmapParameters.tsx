@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import NumberInput from "./NumberInput";
 
 interface HeatmapParametersProps {
   onParametersChange: (params: HeatmapParams) => void;
@@ -73,67 +74,29 @@ export default function HeatmapParameters({
 
       {isOpen && (
         <div className='px-6 pb-6 space-y-4 border-t border-white/10 pt-4'>
-          <div>
-            <label className='block text-sm font-medium text-blue-200 mb-2'>
-              Min Spot Price
-            </label>
-            <div className='flex gap-2'>
-              <input
-                type='number'
-                value={params.minSpotPrice}
-                onChange={(e) =>
-                  updateParam("minSpotPrice", parseFloat(e.target.value) || 0)
-                }
-                step='1'
-                className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              />
-              <button
-                type='button'
-                onClick={() => updateValue("minSpotPrice", -5, 1)}
-                className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-              >
-                −
-              </button>
-              <button
-                type='button'
-                onClick={() => updateValue("minSpotPrice", 5, 1)}
-                className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-              >
-                +
-              </button>
-            </div>
-          </div>
+          <NumberInput
+            label='Min Spot Price'
+            name='minSpotPrice'
+            value={params.minSpotPrice}
+            onChange={(e) =>
+              updateParam("minSpotPrice", parseFloat(e.target.value) || 0)
+            }
+            onIncrement={() => updateValue("minSpotPrice", 5, 1)}
+            onDecrement={() => updateValue("minSpotPrice", -5, 1)}
+            step='1'
+          />
 
-          <div>
-            <label className='block text-sm font-medium text-blue-200 mb-2'>
-              Max Spot Price
-            </label>
-            <div className='flex gap-2'>
-              <input
-                type='number'
-                value={params.maxSpotPrice}
-                onChange={(e) =>
-                  updateParam("maxSpotPrice", parseFloat(e.target.value) || 0)
-                }
-                step='1'
-                className='flex-1 px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-              />
-              <button
-                type='button'
-                onClick={() => updateValue("maxSpotPrice", -5, 1)}
-                className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-              >
-                −
-              </button>
-              <button
-                type='button'
-                onClick={() => updateValue("maxSpotPrice", 5, 1)}
-                className='px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white font-bold transition-colors'
-              >
-                +
-              </button>
-            </div>
-          </div>
+          <NumberInput
+            label='Max Spot Price'
+            name='maxSpotPrice'
+            value={params.maxSpotPrice}
+            onChange={(e) =>
+              updateParam("maxSpotPrice", parseFloat(e.target.value) || 0)
+            }
+            onIncrement={() => updateValue("maxSpotPrice", 5, 1)}
+            onDecrement={() => updateValue("maxSpotPrice", -5, 1)}
+            step='1'
+          />
 
           <div>
             <label className='block text-sm font-medium text-blue-200 mb-2'>

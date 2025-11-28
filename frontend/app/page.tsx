@@ -37,7 +37,7 @@ export default function Home() {
 
   return (
     <main className='min-h-screen p-8 bg-[#070e20]'>
-      <div className='max-w-7xl mx-auto relative'>
+      <div className='max-w-8xl mx-auto relative'>
         <header className='text-center mb-12'>
           <h1 className='text-5xl font-bold text-white mb-4'>
             Black-Scholes Option Pricing
@@ -47,10 +47,10 @@ export default function Home() {
           </p>
         </header>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-4 gap-8'>
           {/* Left Column - Input */}
           <div className='lg:col-span-1'>
-            <div className='sticky top-8 self-start space-y-4'>
+            <div className='self-start space-y-4'>
               <OptionCalculator
                 onCalculate={handleCalculate}
                 onInputChange={handleInputChange}
@@ -62,7 +62,7 @@ export default function Home() {
           </div>
 
           {/* Right Column - Results */}
-          <div className='lg:col-span-2 space-y-6'>
+          <div className='lg:col-span-3 space-y-6'>
             {optionData && (
               <>
                 {/* Option Prices */}
