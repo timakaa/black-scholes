@@ -76,7 +76,7 @@ def create_heatmap(data: np.ndarray,
 
 
 def generate_option_heatmap(bs_model, option_type: str, 
-                           stock_range: tuple = (0.7, 1.3),
+                           stock_range: tuple = (70, 130),
                            volatility_range: tuple = (0.1, 0.4),
                            points: int = 10) -> str:
     """
@@ -85,7 +85,7 @@ def generate_option_heatmap(bs_model, option_type: str,
     Args:
         bs_model: BlackScholes model instance
         option_type: 'call' or 'put'
-        stock_range: (min_multiplier, max_multiplier) for stock price
+        stock_range: (min_price, max_price) absolute stock prices
         volatility_range: (min_vol, max_vol)
         points: Number of points in each dimension
     
@@ -99,8 +99,8 @@ def generate_option_heatmap(bs_model, option_type: str,
     r = bs_model.get_risk_free_rate()
     sigma0 = bs_model.get_volatility()
     
-    # Create ranges
-    stock_prices = np.linspace(S0 * stock_range[0], S0 * stock_range[1], points)
+    # Create ranges using absolute values
+    stock_prices = np.linspace(stock_range[0], stock_range[1], points)
     volatilities = np.linspace(volatility_range[0], volatility_range[1], points)
     
     # Calculate option prices
@@ -147,7 +147,7 @@ def generate_option_heatmap(bs_model, option_type: str,
 
 
 def generate_greeks_heatmap(bs_model, greek: str,
-                           stock_range: tuple = (0.7, 1.3),
+                           stock_range: tuple = (70, 130),
                            vol_range: tuple = (0.1, 0.5),
                            points: int = 20) -> str:
     """
@@ -169,8 +169,8 @@ def generate_greeks_heatmap(bs_model, greek: str,
     T0 = bs_model.get_time_to_maturity()
     sigma0 = bs_model.get_volatility()
     
-    # Create ranges
-    stock_prices = np.linspace(S0 * stock_range[0], S0 * stock_range[1], points)
+    # Create ranges using absolute values
+    stock_prices = np.linspace(stock_range[0], stock_range[1], points)
     volatilities = np.linspace(vol_range[0], vol_range[1], points)
     
     # Calculate Greek values

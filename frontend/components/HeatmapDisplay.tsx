@@ -9,12 +9,14 @@ interface HeatmapDisplayProps {
   title: string;
   heatmapType: string;
   inputData: any;
+  heatmapParams?: any;
 }
 
 export default function HeatmapDisplay({
   title,
   heatmapType,
   inputData,
+  heatmapParams,
 }: HeatmapDisplayProps) {
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,10 +33,17 @@ export default function HeatmapDisplay({
       setError(null);
 
       try {
-        console.log(`Fetching heatmap: ${heatmapType}`, inputData);
+        const requestData = {
+          ...inputData,
+          min_spot_price: heatmapParams?.minSpotPrice || 70,
+          max_spot_price: heatmapParams?.maxSpotPrice || 130,
+          min_volatility: heatmapParams?.minVolatility || 0.1,
+          max_volatility: heatmapParams?.maxVolatility || 0.4,
+        };
+        console.log(`Fetching heatmap: ${heatmapType}`, requestData);
         const response = await axios.post(
           `${API_URL}/heatmap/${heatmapType}`,
-          inputData,
+          requestData,
         );
         console.log("Heatmap response:", response.data);
         setImageData(response.data.image);
@@ -54,7 +63,7 @@ export default function HeatmapDisplay({
     }, 800); // 800ms debounce (slightly longer than calculator since heatmaps are heavier)
 
     return () => clearTimeout(timer);
-  }, [heatmapType, inputData]);
+  }, [heatmapType, inputData, heatmapParams]);
 
   return (
     <div className='bg-slate-900/60 backdrop-blur-xl rounded-xl p-6 border border-white/10 shadow-2xl'>

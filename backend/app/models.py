@@ -51,3 +51,14 @@ class ImpliedVolatilityInput(BaseModel):
 
 class ImpliedVolatilityResponse(BaseModel):
     implied_volatility: float
+
+class HeatmapInput(BaseModel):
+    stock_price: float = Field(..., gt=0)
+    strike_price: float = Field(..., gt=0)
+    time_to_maturity: float = Field(..., gt=0)
+    risk_free_rate: float = Field(..., ge=0, le=1)
+    volatility: float = Field(..., gt=0, le=5)
+    min_spot_price: float = Field(default=70, gt=0)
+    max_spot_price: float = Field(default=130, gt=0)
+    min_volatility: float = Field(default=0.1, gt=0, le=1)
+    max_volatility: float = Field(default=0.4, gt=0, le=1)

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models import (
     OptionInput, OptionResponse, GreeksResponse, ProbabilityResponse,
     DistributionResponse, ProfitLossResponse, PricePoint,
-    ImpliedVolatilityInput, ImpliedVolatilityResponse
+    ImpliedVolatilityInput, ImpliedVolatilityResponse, HeatmapInput
 )
 import sys
 import os
@@ -97,7 +97,7 @@ def calculate_option(input_data: OptionInput):
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/heatmap/{heatmap_type}")
-def get_heatmap(heatmap_type: str, input_data: OptionInput):
+def get_heatmap(heatmap_type: str, input_data: HeatmapInput):
     """Generate heatmap visualization"""
     if not bs:
         raise HTTPException(status_code=500, detail="C++ module not loaded")
@@ -113,12 +113,16 @@ def get_heatmap(heatmap_type: str, input_data: OptionInput):
             input_data.volatility
         )
         
+        # Calculate stock range as absolute values
+        stock_range = (input_data.min_spot_price, input_data.max_spot_price)
+        vol_range = (input_data.min_volatility, input_data.max_volatility)
+        
         if heatmap_type == "call":
-            image_data = generate_option_heatmap(model, "call")
+            image_data = generate_option_heatmap(model, "call", stock_range, vol_range)
         elif heatmap_type == "put":
-            image_data = generate_option_heatmap(model, "put")
+            image_data = generate_option_heatmap(model, "put", stock_range, vol_range)
         elif heatmap_type in ["call_delta", "put_delta", "gamma", "vega", "call_theta", "put_theta"]:
-            image_data = generate_greeks_heatmap(model, heatmap_type)
+            image_data = generate_greeks_heatmap(model, heatmap_type, stock_range, vol_range)
         else:
             raise HTTPException(status_code=400, detail=f"Unknown heatmap type: {heatmap_type}")
         

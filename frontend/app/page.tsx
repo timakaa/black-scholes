@@ -5,6 +5,9 @@ import OptionCalculator from "@/components/OptionCalculator";
 import GreeksDisplay from "@/components/GreeksDisplay";
 import ProbabilityDisplay from "@/components/ProbabilityDisplay";
 import HeatmapDisplay from "@/components/HeatmapDisplay";
+import HeatmapParameters, {
+  HeatmapParams,
+} from "@/components/HeatmapParameters";
 
 export default function Home() {
   const [optionData, setOptionData] = useState<any>(null);
@@ -14,6 +17,12 @@ export default function Home() {
     time_to_maturity: 1.0,
     risk_free_rate: 0.05,
     volatility: 0.2,
+  });
+  const [heatmapParams, setHeatmapParams] = useState<HeatmapParams>({
+    minSpotPrice: 70,
+    maxSpotPrice: 130,
+    minVolatility: 0.1,
+    maxVolatility: 0.4,
   });
   const [loading, setLoading] = useState(false);
 
@@ -41,13 +50,14 @@ export default function Home() {
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
           {/* Left Column - Input */}
           <div className='lg:col-span-1'>
-            <div className='sticky top-8 self-start'>
+            <div className='sticky top-8 self-start space-y-4'>
               <OptionCalculator
                 onCalculate={handleCalculate}
                 onInputChange={handleInputChange}
                 loading={loading}
                 setLoading={setLoading}
               />
+              <HeatmapParameters onParametersChange={setHeatmapParams} />
             </div>
           </div>
 
@@ -100,11 +110,13 @@ export default function Home() {
                       title='Call Option Price Heatmap'
                       heatmapType='call'
                       inputData={inputData}
+                      heatmapParams={heatmapParams}
                     />
                     <HeatmapDisplay
                       title='Put Option Price Heatmap'
                       heatmapType='put'
                       inputData={inputData}
+                      heatmapParams={heatmapParams}
                     />
                   </div>
                 )}
