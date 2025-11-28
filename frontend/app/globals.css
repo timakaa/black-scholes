@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/* Custom scrollbar - Firefox */
+html {
+  scrollbar-color: #475569 #1e293b;
+}
+
+/* Custom scrollbar - Chromium */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 /* Hide default number input arrows */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
