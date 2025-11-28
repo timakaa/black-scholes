@@ -25,28 +25,22 @@ A full-stack application for pricing European options using the Black-Scholes mo
 └─────────────────┘
 ```
 
-## Project Structure
-
-```
-black-scholes/
-├── cpp/                    # C++ core library
-│   ├── src/
-│   ├── include/
-│   └── CMakeLists.txt
-├── backend/                # Python FastAPI
-│   ├── app/
-│   ├── requirements.txt
-│   └── main.py
-├── frontend/               # Next.js application
-│   ├── app/
-│   ├── components/
-│   └── package.json
-└── README.md
-```
-
 ## Quick Start
 
-### 1. Build C++ Library
+### Option 1: Docker (Recommended)
+
+```bash
+docker-compose pull
+docker-compose up -d
+```
+
+Visit http://localhost:3000
+
+See [DOCKER.md](docs/DOCKER.md) for more details.
+
+### Option 2: Manual Setup
+
+#### 1. Build C++ Library
 
 ```bash
 cd cpp
@@ -55,7 +49,7 @@ cmake ..
 make
 ```
 
-### 2. Start Backend
+#### 2. Start Backend
 
 ```bash
 cd backend
@@ -63,7 +57,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### 3. Start Frontend
+#### 3. Start Frontend
 
 ```bash
 cd frontend
@@ -72,12 +66,3 @@ npm run dev
 ```
 
 Visit http://localhost:3000
-
-## Features
-
-- Real-time option pricing calculations
-- Interactive parameter adjustments
-- Greeks visualization (Delta, Gamma, Vega, Theta, Rho)
-- Probability distributions
-- Profit/Loss diagrams
-- Historical volatility analysis

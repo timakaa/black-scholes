@@ -114,7 +114,7 @@ docker-compose push
 
 The docker-compose.yml uses environment variables for flexible image naming:
 
-- `DOCKER_USERNAME` - Your Docker Hub username (default: yourusername)
+- `DOCKER_USERNAME` - Your Docker Hub username
 - `IMAGE_TAG` - Image version tag (default: latest)
 
 Images will be named:
