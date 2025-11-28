@@ -56,12 +56,14 @@ def create_heatmap(data: np.ndarray,
     for spine in ax.spines.values():
         spine.set_edgecolor('#475569')
     
-    plt.tight_layout()
+    # Adjust layout with consistent padding
+    plt.subplots_adjust(left=0.12, right=0.92, top=0.92, bottom=0.12)
     
     # Convert to base64
     buffer = BytesIO()
     try:
-        fig.savefig(buffer, format='png', dpi=120, bbox_inches='tight', facecolor='#0f172a', edgecolor='none')
+        # Don't use bbox_inches='tight' to ensure consistent dimensions
+        fig.savefig(buffer, format='png', dpi=120, facecolor='#0f172a', edgecolor='none')
         buffer.seek(0)
         image_bytes = buffer.read()
         
