@@ -37,7 +37,7 @@ export default function Home() {
 
   return (
     <main className='min-h-screen p-8 bg-[#070e20]'>
-      <div className='max-w-8xl mx-auto relative'>
+      <div className='max-w-7xl mx-auto relative'>
         <header className='text-center mb-12'>
           <h1 className='text-5xl font-bold text-white mb-4'>
             Black-Scholes Option Pricing
