@@ -5,6 +5,7 @@ from app.models import (
     DistributionResponse, ProfitLossResponse, PricePoint,
     ImpliedVolatilityInput, ImpliedVolatilityResponse, HeatmapInput
 )
+from app.cache import cache
 import sys
 import os
 
@@ -55,6 +56,16 @@ def calculate_option(input_data: OptionInput):
         raise HTTPException(status_code=500, detail="C++ module not loaded")
     
     try:
+        # Create cache key from input parameters
+        cache_params = input_data.model_dump()
+        
+        # Try to get from cache
+        cached_result = cache.get("calculate", cache_params)
+        if cached_result:
+            print("CACHED")
+            return OptionResponse(**cached_result)
+        
+        # Calculate if not in cache
         model = bs.BlackScholes(
             input_data.stock_price,
             input_data.strike_price,
@@ -67,7 +78,7 @@ def calculate_option(input_data: OptionInput):
         call_prob = model.calculate_probabilities(True)
         put_prob = model.calculate_probabilities(False)
         
-        return OptionResponse(
+        response = OptionResponse(
             call_price=result.call_price,
             put_price=result.put_price,
             greeks=GreeksResponse(
@@ -93,6 +104,11 @@ def calculate_option(input_data: OptionInput):
                 break_even_price=put_prob.break_even_price
             )
         )
+        
+        # Cache the result (TTL: 1 hour)
+        cache.set("calculate", cache_params, response.model_dump(), ttl=3600)
+        
+        return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -137,6 +153,15 @@ def calculate_implied_volatility(input_data: ImpliedVolatilityInput):
         raise HTTPException(status_code=500, detail="C++ module not loaded")
     
     try:
+        # Create cache key from input parameters
+        cache_params = input_data.model_dump()
+        
+        # Try to get from cache
+        cached_result = cache.get("implied_vol", cache_params)
+        if cached_result:
+            return ImpliedVolatilityResponse(**cached_result)
+        
+        # Calculate if not in cache
         iv = bs.BlackScholes.implied_volatility(
             input_data.market_price,
             input_data.stock_price,
@@ -146,7 +171,12 @@ def calculate_implied_volatility(input_data: ImpliedVolatilityInput):
             input_data.is_call
         )
         
-        return ImpliedVolatilityResponse(implied_volatility=iv)
+        response = ImpliedVolatilityResponse(implied_volatility=iv)
+        
+        # Cache the result (TTL: 1 hour)
+        cache.set("implied_vol", cache_params, response.model_dump(), ttl=3600)
+        
+        return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

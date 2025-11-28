@@ -12,3 +12,6 @@ dist/
 build/
 blackscholes_cpp*.so
 blackscholes_cpp*.pyd
+__pycache__/
+.env
+.env*.local

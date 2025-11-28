@@ -12,18 +12,25 @@ A full-stack application for pricing European options using the Black-Scholes mo
          │
          │ HTTP/REST
          │
-┌────────▼────────┐
-│   FastAPI       │  Backend - API Layer
-│   Python        │  Port: 8000
-└────────┬────────┘
+┌────────▼────────┐                        ┌─────────────────┐
+│   FastAPI       │  Backend - API Layer   │   Redis         │  Cache Layer
+│   Python        │  Port: 8000            │   Cache         │  Port: 6379
+└────────┬────────┘                        └─────────────────┘
          │
          │ Python Bindings (pybind11)
          │
 ┌────────▼────────┐
-│   C++           │  Core - Black-Scholes Logic
-│   Library       │  Compiled to .so/.dll
+│   C++           │
+│   Library       │
 └─────────────────┘
 ```
+
+## Features
+
+- **High-Performance Calculations**: C++ core for fast Black-Scholes computations
+- **Redis Caching**: Automatic caching of calculations to improve response times
+- **RESTful API**: Clean FastAPI backend with automatic documentation
+- **Interactive UI**: Modern Next.js frontend with real-time calculations
 
 ## Quick Start
 
@@ -41,3 +48,11 @@ See [DOCKER.md](docs/DOCKER.md) for more details.
 ### Option 2: Manual Setup
 
 See [SETUP.md](docs/SETUP.md) for completely manual setup
+
+## Services
+
+When running with Docker Compose:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
